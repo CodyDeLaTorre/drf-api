@@ -25,6 +25,9 @@ class WizardTests(APITestCase):
         )
         test_wizard.save()
 
+    def setUp(self):
+        self.client.login(username='testuser1', password='pass')
+
     def test_wizards_model(self):
         wizard = Wizard.objects.get(id=1)
         actual_creator = str(wizard.creator)
@@ -86,4 +89,9 @@ class WizardTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         wizards = Wizard.objects.all()
         self.assertEqual(len(wizards), 0)
-# Create your tests here.
+
+    def test_authentication_required(self):
+        self.client.logout()
+        url = reverse("wizard_list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
